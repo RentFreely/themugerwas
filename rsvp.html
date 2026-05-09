@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>RSVP — The Mugerwas</title>
+  <meta name="description" content="Confirm your attendance to Tim & Rebecca's wedding. Please respond by 1 August 2026." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Great+Vibes&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+
+  <style>
+    /* ── RSVP SPLIT LAYOUT ──────────────────────────────── */
+    .rsvp-shell {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: calc(100dvh - 64px);
+    }
+    .rsvp-photo {
+      position: sticky; top: 64px;
+      height: calc(100dvh - 64px);
+      overflow: hidden;
+    }
+    .rsvp-photo img {
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: top center;
+      filter: brightness(0.55) contrast(1.05);
+    }
+    .rsvp-photo-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(6,6,10,0.4), rgba(201,168,76,0.06));
+    }
+    .rsvp-photo-text {
+      position: absolute; bottom: 52px; left: 44px; right: 44px;
+    }
+    .rsvp-photo-text blockquote {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-size: clamp(1.4rem, 2.5vw, 2rem);
+      font-weight: 300; color: var(--text); line-height: 1.4;
+      border: none; padding: 0; margin: 0;
+    }
+    .rsvp-photo-text p {
+      font-size: 0.65rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold); margin-top: 12px;
+    }
+    .rsvp-photo-text::before {
+      content: ''; display: block; width: 40px; height: 1px;
+      background: var(--gold); margin-bottom: 16px; opacity: 0.6;
+    }
+
+    .rsvp-form-panel {
+      padding: clamp(2rem, 5vw, 3.5rem) clamp(1.5rem, 4vw, 3rem);
+      display: flex; flex-direction: column;
+      justify-content: center; overflow-y: auto;
+      border-left: 1px solid var(--line-dim);
+      min-height: calc(100dvh - 64px);
+    }
+
+    /* ── STEP SECTIONS ──────────────────────────────────── */
+    .rsvp-step { display: none; animation: stepIn 0.45s var(--ease-out) both; }
+    .rsvp-step.active { display: block; }
+    @keyframes stepIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .step-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-weight: 300;
+      font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+      color: var(--text); line-height: 1.2; margin-bottom: 1.8rem;
+    }
+    .step-heading em { color: var(--gold); font-style: italic; }
+
+    /* ── CONFIRMATION SCREEN ────────────────────────────── */
+    .confirm-screen {
+      text-align: center; padding: 1rem 0;
+      display: none;
+      animation: stepIn 0.6s var(--ease-out) both;
+    }
+    .confirm-screen.show { display: block; }
+    .mandala-wrap {
+      width: 200px; height: 200px;
+      margin: 0 auto 1.6rem; position: relative;
+    }
+    .mandala-ring-a, .mandala-ring-b {
+      position: absolute; border-radius: 50%;
+      border: 1px solid rgba(201,168,76,0.2);
+      animation: breathe 6s ease-in-out infinite;
+    }
+    .mandala-ring-a { inset: -20px; }
+    .mandala-ring-b { inset: -36px; animation-delay: 1s; animation-direction: reverse; }
+    .confirm-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-size: clamp(2.5rem, 6vw, 4rem);
+      color: var(--gold); line-height: 1;
+    }
+    .confirm-subtitle {
+      font-size: 0.65rem; letter-spacing: 0.24em;
+      text-transform: uppercase; color: var(--muted); margin-top: 6px;
+    }
+    .confirm-msg {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-size: 1.1rem;
+      color: var(--text); line-height: 1.8;
+      max-width: 380px; margin: 1.2rem auto 0;
+      opacity: 0.85;
+    }
+    .confirm-chip {
+      display: inline-block; margin-top: 1.4rem;
+      padding: 10px 28px; border: 1px solid var(--line-dim);
+      font-size: 0.62rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold);
+    }
+
+    @media (max-width: 860px) {
+      .rsvp-shell { grid-template-columns: 1fr; }
+      .rsvp-photo { display: none; }
+      .rsvp-form-panel { min-height: auto; padding: 1.5rem 1rem; }
+    }
+  </style>
+</head>
+<body data-page="rsvp">
+
+  <!-- PORTAL -->
+  <div class="portal-layer" id="portal-layer" aria-hidden="true">
+    <div class="portal-ring portal-ring-a"></div>
+    <div class="portal-ring portal-ring-b"></div>
+    <div class="portal-ring portal-ring-c"></div>
+  </div>
+
+  <canvas id="fx-canvas" aria-hidden="true"></canvas>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- NAV -->
+  <header class="top-nav" role="banner">
+    <a class="brand" href="./index.html">The Mugerwas</a>
+    <nav aria-label="Site navigation">
+      <a href="./index.html">Home</a>
+      <a href="./rsvp.html" aria-current="page">RSVP</a>
+      <a href="./details.html">Details</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="rsvp-shell">
+
+      <!-- LEFT — PHOTO PANEL -->
+      <div class="rsvp-photo" aria-hidden="true">
+        <img src="./public/themugerwas3.jpeg" alt="" />
+        <div class="rsvp-photo-overlay"></div>
+        <div class="rsvp-photo-text">
+          <blockquote>
+            "We would be deeply honoured by your presence at our celebration."
+          </blockquote>
+          <p>Kindly respond by 1 August 2026</p>
+        </div>
+      </div>
+
+      <!-- RIGHT — FORM PANEL -->
+      <div class="rsvp-form-panel">
+        <div id="rsvp-alert" class="alert success hidden" role="status" aria-live="polite"></div>
+        <div id="rsvp-error" class="alert error hidden"   role="alert"  aria-live="assertive"></div>
+
+        <!-- STEP INDICATOR -->
+        <div class="steps" role="list" aria-label="Form progress">
+          <div class="step-dot active" data-dot="1" role="listitem" aria-label="Step 1">1</div>
+          <div class="step-line" id="sl-1"></div>
+          <div class="step-dot" data-dot="2" role="listitem" aria-label="Step 2">2</div>
+          <div class="step-line" id="sl-2"></div>
+          <div class="step-dot" data-dot="3" role="listitem" aria-label="Step 3">3</div>
+        </div>
+
+        <form id="rsvp-form" novalidate>
+
+          <!-- ── STEP 1: WHO ARE YOU? ──────────────────── -->
+          <div class="rsvp-step active" data-step="1">
+            <h2 class="step-heading">
+              A warm <em>welcome.</em><br>
+              Who shall we expect?
+            </h2>
+
+            <div class="field">
+              <label for="inviteCode">Invitation Code</label>
+              <input id="inviteCode" name="inviteCode" required maxlength="40"
+                     placeholder="e.g. MUG-4F92AC" autocomplete="off"
+                     spellcheck="false" />
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label for="fullName">Full Name</label>
+                <input id="fullName" name="fullName" required maxlength="120"
+                       autocomplete="name" />
+              </div>
+              <div class="field">
+                <label for="email">Email Address</label>
+                <input id="email" name="email" type="email" required maxlength="180"
+                       autocomplete="email" />
+              </div>
+            </div>
+          </div>
+
+          <!-- ── STEP 2: ATTENDANCE + MEAL ─────────────── -->
+          <div class="rsvp-step" data-step="2">
+            <h2 class="step-heading">
+              Will you <em>join us</em><br>
+              for the celebration?
+            </h2>
+
+            <div class="field">
+              <label>Your Response</label>
+              <div class="choice-row" role="group" aria-label="Attendance choice">
+                <div class="choice" data-attend="yes" role="button" tabindex="0"
+                     aria-pressed="false">
+                  <span class="choice-icon" aria-hidden="true">🥂</span>
+                  <b>Joyfully Accepts</b>
+                  <span>I will be there</span>
+                </div>
+                <div class="choice" data-attend="no" role="button" tabindex="0"
+                     aria-pressed="false">
+                  <span class="choice-icon" aria-hidden="true">💌</span>
+                  <b>Regretfully Declines</b>
+                  <span>I cannot attend</span>
+                </div>
+              </div>
+              <input id="attending" name="attending" type="hidden" required />
+            </div>
+
+            <div id="attending-fields">
+              <!-- Seats stepper -->
+              <div class="field">
+                <label>Seats (including yourself)</label>
+                <div class="stepper" role="group" aria-label="Number of seats">
+                  <button type="button" class="stepper-btn" id="seat-down"
+                          aria-label="Decrease seats">−</button>
+                  <span class="stepper-val" id="seat-val" aria-live="polite">1</span>
+                  <button type="button" class="stepper-btn" id="seat-up"
+                          aria-label="Increase seats">+</button>
+                  <input id="guestCount" name="guestCount" type="hidden" value="1" />
+                </div>
+              </div>
+
+              <!-- Meal cards -->
+              <div class="field">
+                <label>Meal Preference</label>
+                <div class="meal-grid" role="group" aria-label="Meal selection">
+                  <div class="meal-card" data-meal="Beef"       role="button" tabindex="0">
+                    <span class="meal-icon" aria-hidden="true">🥩</span>
+                    <span class="meal-name">Beef</span>
+                  </div>
+                  <div class="meal-card" data-meal="Chicken"    role="button" tabindex="0">
+                    <span class="meal-icon" aria-hidden="true">🍗</span>
+                    <span class="meal-name">Chicken</span>
+                  </div>
+                  <div class="meal-card" data-meal="Fish"       role="button" tabindex="0">
+                    <span class="meal-icon" aria-hidden="true">🐟</span>
+                    <span class="meal-name">Fish</span>
+                  </div>
+                  <div class="meal-card" data-meal="Vegetarian" role="button" tabindex="0">
+                    <span class="meal-icon" aria-hidden="true">🥗</span>
+                    <span class="meal-name">Vegetarian</span>
+                  </div>
+                </div>
+                <input id="meal" name="meal" type="hidden" />
+              </div>
+
+              <div class="field">
+                <label for="dietary">Dietary Notes <span style="opacity:0.4;font-size:0.9em">(optional)</span></label>
+                <input id="dietary" name="dietary" maxlength="220"
+                       placeholder="Allergies or dietary restrictions" />
+              </div>
+            </div>
+          </div>
+
+          <!-- ── STEP 3: PERSONAL TOUCH ─────────────────── -->
+          <div class="rsvp-step" data-step="3">
+            <h2 class="step-heading">
+              One last <em>touch</em><br>
+              of love.
+            </h2>
+
+            <div class="field">
+              <label for="song">Song Request <span aria-hidden="true">🎵</span></label>
+              <input id="song" name="song" maxlength="120"
+                     placeholder="What song will fill the dance floor?" />
+            </div>
+            <div class="field">
+              <label for="message">A Message to Tim &amp; Rebecca</label>
+              <textarea id="message" name="message" maxlength="1200"
+                        placeholder="Share your wishes, blessings, or love..."></textarea>
+            </div>
+          </div>
+
+          <!-- NAVIGATION BUTTONS -->
+          <div class="tools-row" style="margin-top:0.5rem;">
+            <button id="backBtn" type="button" class="btn hidden">← Back</button>
+            <button id="nextBtn" type="button" class="btn btn-primary">Continue →</button>
+            <button id="submitBtn" type="submit" class="btn btn-primary hidden">
+              Send My Response 💛
+            </button>
+          </div>
+
+        </form>
+
+        <!-- CONFIRMATION SCREEN (replaces form) -->
+        <div class="confirm-screen" id="confirm-screen" aria-live="polite">
+          <div class="mandala-wrap">
+            <canvas id="mandala-canvas" width="200" height="200"></canvas>
+            <div class="mandala-ring-a" aria-hidden="true"></div>
+            <div class="mandala-ring-b" aria-hidden="true"></div>
+          </div>
+          <p class="confirm-title" id="confirm-title">Thank You</p>
+          <p class="confirm-subtitle" id="confirm-subtitle">Response received</p>
+          <p class="confirm-msg"   id="confirm-msg"></p>
+          <div class="confirm-chip">29 August 2026 &nbsp;·&nbsp; Kampala</div>
+          <div style="margin-top:1.4rem;display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;">
+            <a class="btn btn-primary" href="./details.html">View Event Details →</a>
+            <a class="btn" href="./index.html">Back to Home</a>
+          </div>
+        </div>
+
+      </div><!-- end form panel -->
+    </div><!-- end rsvp-shell -->
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./config.js"></script>
+  <script src="./main.js"></script>
+  <script src="./rsvp.js"></script>
+</body>
+</html>
