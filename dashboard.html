@@ -37,7 +37,7 @@
       <div class="tools-row">
         <div class="field">
           <label for="searchInput">Search</label>
-          <input id="searchInput" placeholder="Name or email" />
+          <input id="searchInput" placeholder="Name, email, or phone" />
         </div>
         <button id="refreshBtn" class="btn" type="button">Refresh</button>
         <button id="csvBtn" class="btn" type="button">CSV</button>
@@ -46,7 +46,8 @@
 
       <div class="kpis">
         <div class="kpi"><b id="kTotal">0</b><span>Total</span></div>
-        <div class="kpi"><b id="kYes">0</b><span>Attending</span></div>
+        <div class="kpi"><b id="kYes">0</b><span>Accept</span></div>
+        <div class="kpi"><b id="kMaybe">0</b><span>Maybe</span></div>
         <div class="kpi"><b id="kNo">0</b><span>Declined</span></div>
         <div class="kpi"><b id="kSeats">0</b><span>Seats</span></div>
       </div>
@@ -55,7 +56,7 @@
         <table>
           <thead>
             <tr>
-              <th>Name</th><th>Email</th><th>Status</th><th>Seats</th><th>Meal</th><th>Actions</th>
+              <th>Name</th><th>Email</th><th>Phone</th><th>Status</th><th>Seats</th><th>Meal</th><th>Actions</th>
             </tr>
           </thead>
           <tbody id="rsvpRows"></tbody>

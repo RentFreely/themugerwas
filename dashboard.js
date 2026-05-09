@@ -21,12 +21,33 @@
   let allRows = [];
   let refreshTimer = 0;
 
+  const attendanceKey = (r) => {
+    const a = r.attending;
+    if (a === true || a === "yes") return "yes";
+    if (a === "maybe") return "maybe";
+    return "no";
+  };
+
+  const statusLabel = (r) => {
+    const k = attendanceKey(r);
+    if (k === "yes") return { cls: "ok", label: "Accept" };
+    if (k === "maybe") return { cls: "maybe", label: "Maybe" };
+    return { cls: "no", label: "Declined" };
+  };
+
   const compute = (rows) => {
-    const yes = rows.filter((r) => r.attending).length;
-    const no = rows.length - yes;
-    const seats = rows.filter((r) => r.attending).reduce((a, r) => a + Number(r.guest_count || 0), 0);
+    const yes = rows.filter((r) => attendanceKey(r) === "yes").length;
+    const maybe = rows.filter((r) => attendanceKey(r) === "maybe").length;
+    const no = rows.filter((r) => attendanceKey(r) === "no").length;
+    const seats = rows
+      .filter((r) => {
+        const k = attendanceKey(r);
+        return k === "yes" || k === "maybe";
+      })
+      .reduce((a, r) => a + Number(r.guest_count || 0), 0);
     document.getElementById("kTotal").textContent = rows.length;
     document.getElementById("kYes").textContent = yes;
+    document.getElementById("kMaybe").textContent = maybe;
     document.getElementById("kNo").textContent = no;
     document.getElementById("kSeats").textContent = seats;
     document.title = `Dashboard (${rows.length}/${expected}) — The Mugerwas`;
@@ -35,17 +56,21 @@
   const render = (rows) => {
     rowsEl.innerHTML = rows
       .map(
-        (r) => `<tr data-id="${r.id}">
+        (r) => {
+          const st = statusLabel(r);
+          return `<tr data-id="${r.id}">
           <td>${r.full_name || ""}</td>
           <td>${r.email || ""}</td>
-          <td><span class="badge ${r.attending ? "ok" : "no"}">${r.attending ? "Attending" : "Declined"}</span></td>
+          <td>${r.phone || "—"}</td>
+          <td><span class="badge ${st.cls}">${st.label}</span></td>
           <td>${r.guest_count || 0}</td>
           <td>${r.meal || "—"}</td>
           <td>
             <button class="btn btn-inline" data-edit="${r.id}">Edit</button>
             <button class="btn btn-inline" data-delete="${r.id}">Delete</button>
           </td>
-        </tr>`,
+        </tr>`;
+        },
       )
       .join("");
   };
@@ -65,7 +90,12 @@
   const filter = () => {
     const q = (document.getElementById("searchInput").value || "").trim().toLowerCase();
     const filtered = allRows.filter((r) =>
-      !q || (r.full_name || "").toLowerCase().includes(q) || (r.email || "").toLowerCase().includes(q),
+      !q ||
+      (r.full_name || "").toLowerCase().includes(q) ||
+      (r.email || "").toLowerCase().includes(q) ||
+      String(r.phone || "")
+        .toLowerCase()
+        .includes(q),
     );
     render(filtered);
   };
@@ -103,7 +133,7 @@
   document.getElementById("refreshBtn").addEventListener("click", () => load());
   document.getElementById("searchInput").addEventListener("input", filter);
   document.getElementById("csvBtn").addEventListener("click", () => {
-    const headers = ["full_name", "email", "attending", "guest_count", "meal", "dietary", "song", "message", "submitted_at"];
+    const headers = ["full_name", "email", "phone", "attending", "guest_count", "meal", "dietary", "song", "message", "submitted_at"];
     const csv = [
       headers.join(","),
       ...allRows.map((r) =>

@@ -28,6 +28,12 @@
 /* ── RESET ──────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
+
+/* Utility: hide elements (welcome overlay overrides below) */
+.hidden {
+  display: none !important;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
@@ -142,7 +148,12 @@ body.portal-in .portal-ring-c { animation-delay: 110ms; }
   display: grid; place-items: center; padding: 1rem;
   transition: opacity 0.5s var(--ease), visibility 0.5s;
 }
-.welcome-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.welcome-overlay.hidden {
+  display: grid !important;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
 .welcome-card {
   width: min(560px, 94vw);
   border: 1px solid var(--line);
@@ -627,6 +638,10 @@ body.portal-in .portal-ring-c { animation-delay: 110ms; }
 
 /* ── CHOICE CARDS (attendance) ───────────────────────────────── */
 .choice-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+.choice-row--three { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 720px) {
+  .choice-row--three { grid-template-columns: 1fr; }
+}
 .choice {
   border: 1px solid var(--line-dim); background: var(--surface);
   padding: 1.4rem 1rem; text-align: center;
@@ -744,8 +759,10 @@ body.portal-in .portal-ring-c { animation-delay: 110ms; }
 
 /* ── DASHBOARD ───────────────────────────────────────────────── */
 .kpis {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 0.75rem; margin-bottom: 1.2rem;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
 }
 .kpi {
   background: var(--surface); border: 1px solid var(--line-dim);
@@ -774,7 +791,7 @@ body.portal-in .portal-ring-c { animation-delay: 110ms; }
 
 .table-wrap { overflow: hidden; border: 1px solid var(--line-dim); }
 .table-scroll { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; min-width: 760px; }
+table { width: 100%; border-collapse: collapse; min-width: 860px; }
 th {
   font-size: 0.6rem; letter-spacing: 0.16em;
   text-transform: uppercase; color: var(--gold);
@@ -797,6 +814,11 @@ tr:hover td { background: rgba(201,168,76,0.015); }
   border: 1px solid;
 }
 .badge.ok  { color: var(--ok);     border-color: rgba(120,211,161,0.3); background: rgba(120,211,161,0.06); }
+.badge.maybe {
+  color: var(--gold-light);
+  border-color: rgba(201,168,76,0.35);
+  background: rgba(201,168,76,0.08);
+}
 .badge.no  { color: var(--danger); border-color: rgba(236,108,108,0.3); background: rgba(236,108,108,0.06); }
 
 .dash-charts {
@@ -867,10 +889,16 @@ tr:hover td { background: rgba(201,168,76,0.015); }
   100% { transform: translateY(108vh) rotate(var(--spin, 360deg)) translateX(var(--dx, 0px)); opacity: 0; }
 }
 
-/* ── RESPONSIVE ──────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .kpis {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 @media (max-width: 860px) {
-  .grid-2, .choice-row, .kpis,
+  .grid-2, .choice-row:not(.choice-row--three),
   .details-grid, .dash-charts { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: repeat(2, 1fr); }
   .photo-grid { grid-template-columns: 1fr; }
   .photo-card-main, .photo-card { min-height: 260px; }
   .timeline-row { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
@@ -879,6 +907,7 @@ tr:hover td { background: rgba(201,168,76,0.015); }
   .tl-stop::before { display: none; }
 }
 @media (max-width: 560px) {
+  .kpis { grid-template-columns: 1fr; }
   .photo-grid, .meal-grid { grid-template-columns: 1fr; }
   .top-nav nav { gap: 0.8rem; }
   .top-nav nav a { font-size: 0.58rem; }

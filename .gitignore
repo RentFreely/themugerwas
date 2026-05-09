@@ -20,5 +20,8 @@ pnpm-debug.log*
 # macOS-specific files
 .DS_Store
 
+# Archives (avoid accidental deploy bundles in git)
+*.zip
+
 # jetbrains setting folder
 .idea/

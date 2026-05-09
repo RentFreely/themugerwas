@@ -5,57 +5,64 @@
   const form = document.getElementById("rsvp-form");
   if (!form) return;
 
-  const alertBox = document.getElementById("rsvp-alert");
-  const errBox = document.getElementById("rsvp-error");
+  /** Open RSVP — no per-guest codes for now */
+  const OPEN_INVITE_CODE = "WEB";
+
+  const inlineMsg = document.getElementById("rsvp-inline-msg");
+  const confirmScreen = document.getElementById("confirm-screen");
+  const stepsBar = document.querySelector(".steps");
   const nextBtn = document.getElementById("nextBtn");
   const backBtn = document.getElementById("backBtn");
   const submitBtn = document.getElementById("submitBtn");
-  const sections = [...form.querySelectorAll("section[data-step]")];
+  const sections = [...form.querySelectorAll(".rsvp-step")];
   const dots = [...document.querySelectorAll(".step-dot")];
   const attendChoices = [...document.querySelectorAll(".choice[data-attend]")];
   const attendingInput = document.getElementById("attending");
   const attendingFields = document.getElementById("attending-fields");
+
   const pulsePortal = () => {
     document.body.classList.add("portal-in");
     window.setTimeout(() => document.body.classList.remove("portal-in"), 520);
   };
 
   let step = 1;
-  let inviteMeta = null;
 
-  const showError = (msg) => {
-    errBox.textContent = msg;
-    errBox.classList.remove("hidden");
+  const showInline = (msg, isInfo) => {
+    if (!inlineMsg) return;
+    inlineMsg.textContent = msg;
+    inlineMsg.classList.remove("hidden");
+    inlineMsg.classList.toggle("is-info", Boolean(isInfo));
   };
-  const clearError = () => errBox.classList.add("hidden");
-  const showInfo = (msg) => {
-    alertBox.textContent = msg;
-    alertBox.classList.remove("hidden");
+
+  const clearInline = () => {
+    if (!inlineMsg) return;
+    inlineMsg.textContent = "";
+    inlineMsg.classList.add("hidden");
+    inlineMsg.classList.remove("is-info");
   };
 
   const updateStep = () => {
-    sections.forEach((sec, i) => sec.classList.toggle("hidden", i !== step - 1));
+    sections.forEach((sec, i) => sec.classList.toggle("active", i === step - 1));
     dots.forEach((dot, i) => dot.classList.toggle("active", i === step - 1));
     backBtn.classList.toggle("hidden", step === 1);
     nextBtn.classList.toggle("hidden", step === 3);
-    submitBtn.classList.toggle("hidden", step !== 3);
+    /* Submit lives inside step 3 only — no toggle needed */
   };
-
-  const queryCode = new URLSearchParams(window.location.search).get("guest");
-  if (queryCode) {
-    document.getElementById("inviteCode").value = queryCode;
-  }
 
   const deadline = new Date(cfg.rsvpDeadlineIso || "2026-08-01T23:59:59+03:00");
   if (Date.now() > deadline.getTime()) {
-    showInfo("RSVP period has ended. Thank you for your interest.");
-    form.querySelectorAll("input,select,textarea,button").forEach((el) => (el.disabled = true));
+    showInline("RSVP period has ended. Thank you for your interest.", true);
+    form.querySelectorAll("input,select,textarea,button").forEach((el) => {
+      el.disabled = true;
+    });
     return;
   }
 
   if (!supabaseUrl || !supabaseKey) {
-    showError("Supabase is not configured. Add keys in config.js before collecting real RSVPs.");
-    form.querySelectorAll("button").forEach((b) => (b.disabled = true));
+    showInline("RSVP is temporarily unavailable. Please try again later.");
+    form.querySelectorAll("button").forEach((b) => {
+      b.disabled = true;
+    });
     return;
   }
 
@@ -77,54 +84,47 @@
     setTimeout(() => ctx.close(), 160);
   };
 
+  const wantsSeatsAndMeal = (v) => v === "yes" || v === "maybe";
+
   attendChoices.forEach((choice) => {
     choice.addEventListener("click", () => {
       attendChoices.forEach((item) => item.classList.remove("active"));
       choice.classList.add("active");
       attendingInput.value = choice.dataset.attend;
-      attendingFields.classList.toggle("hidden", choice.dataset.attend !== "yes");
+      attendingFields.classList.toggle("hidden", choice.dataset.attend === "no");
       softClick();
       pulsePortal();
     });
   });
 
-  const validateStep1 = async () => {
-    const inviteCode = document.getElementById("inviteCode").value.trim();
+  const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+
+  /** Full name + email required on every submit */
+  const validateIdentity = () => {
     const fullName = document.getElementById("fullName").value.trim();
     const email = document.getElementById("email").value.trim();
-    if (!inviteCode || !fullName || !email) {
-      showError("Invitation code, full name, and email are required.");
+    if (!fullName) {
+      showInline("Please enter your full name.");
       return false;
     }
-
-    const { data, error } = await sb
-      .from("guest_invites")
-      .select("id, code, guest_name, is_used, rsvp_id")
-      .eq("code", inviteCode)
-      .single();
-
-    if (error || !data) {
-      showError("That invitation code was not found.");
+    if (!email) {
+      showInline("Please enter your email address.");
       return false;
     }
-
-    if (data.is_used) {
-      showError("This invitation code has already been used.");
+    if (!isValidEmail(email)) {
+      showInline("Please enter a valid email address.");
       return false;
-    }
-
-    inviteMeta = data;
-    if (data.guest_name && !fullName) {
-      document.getElementById("fullName").value = data.guest_name;
     }
     return true;
   };
 
+  const validateStep1 = async () => validateIdentity();
+
   const validateCurrentStep = async () => {
-    clearError();
+    clearInline();
     if (step === 1) return validateStep1();
     if (step === 2 && !attendingInput.value) {
-      showError("Please choose whether you will attend.");
+      showInline("Please choose whether you will attend.");
       return false;
     }
     return true;
@@ -137,31 +137,41 @@
     updateStep();
     pulsePortal();
   });
+
   backBtn.addEventListener("click", () => {
-    clearError();
+    clearInline();
     step = Math.max(1, step - 1);
     updateStep();
     pulsePortal();
   });
 
+  const defaultSubmitLabel = submitBtn.textContent.trim();
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    clearError();
-    const ok = await validateCurrentStep();
-    if (!ok || !inviteMeta) return;
+    clearInline();
+    if (!validateIdentity()) return;
+    if (!attendingInput.value) {
+      showInline("Please choose whether you will attend.");
+      return;
+    }
+
     submitBtn.disabled = true;
     submitBtn.textContent = "Submitting...";
 
-    const attending = attendingInput.value === "yes";
+    const attending = attendingInput.value;
+    const includePartyDetails = wantsSeatsAndMeal(attending);
+    const phoneRaw = document.getElementById("phone").value.trim();
     const payload = {
-      invite_id: inviteMeta.id,
-      invite_code: inviteMeta.code,
+      invite_id: null,
+      invite_code: OPEN_INVITE_CODE,
       full_name: document.getElementById("fullName").value.trim(),
       email: document.getElementById("email").value.trim(),
+      phone: phoneRaw || null,
       attending,
-      guest_count: attending ? Number(document.getElementById("guestCount").value || 1) : 0,
-      meal: attending ? (document.getElementById("meal").value || null) : null,
-      dietary: attending ? (document.getElementById("dietary").value.trim() || null) : null,
+      guest_count: includePartyDetails ? Number(document.getElementById("guestCount").value || 1) : 0,
+      meal: includePartyDetails ? document.getElementById("meal").value || null : null,
+      dietary: includePartyDetails ? document.getElementById("dietary").value.trim() || null : null,
       song: document.getElementById("song").value.trim() || null,
       message: document.getElementById("message").value.trim() || null,
       submitted_at: new Date().toISOString(),
@@ -174,16 +184,11 @@
       .single();
 
     if (insertErr || !inserted) {
-      showError(insertErr?.message || "Failed to submit RSVP.");
+      showInline(insertErr?.message || "Something went wrong. Please try again.");
       submitBtn.disabled = false;
-      submitBtn.textContent = "Submit RSVP";
+      submitBtn.textContent = defaultSubmitLabel;
       return;
     }
-
-    await sb
-      .from("guest_invites")
-      .update({ is_used: true, rsvp_id: inserted.id })
-      .eq("id", inviteMeta.id);
 
     if (cfg.confirmationEmailEndpoint) {
       fetch(cfg.confirmationEmailEndpoint, {
@@ -193,15 +198,25 @@
       }).catch(() => {});
     }
 
-    alertBox.classList.remove("hidden");
-    alertBox.textContent = "Thank you! Your RSVP was submitted successfully.";
-    form.reset();
-    attendChoices.forEach((item) => item.classList.remove("active"));
-    attendingFields.classList.remove("hidden");
-    step = 1;
-    updateStep();
+    clearInline();
+    if (stepsBar) stepsBar.hidden = true;
+    form.hidden = true;
+    if (confirmScreen) {
+      const msgEl = document.getElementById("confirm-msg");
+      if (msgEl) {
+        const lines = {
+          yes: "We can’t wait to celebrate with you.",
+          maybe:
+            "We’ve noted that you’re not sure yet — we hope to see you, and you can always reach out if plans change.",
+          no: "Thank you for letting us know. You’ll be missed.",
+        };
+        msgEl.textContent = lines[attending] || lines.no;
+      }
+      confirmScreen.classList.add("show");
+    }
+
     submitBtn.disabled = false;
-    submitBtn.textContent = "Submit RSVP";
+    submitBtn.textContent = defaultSubmitLabel;
   });
 
   updateStep();

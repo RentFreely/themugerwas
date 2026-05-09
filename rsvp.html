@@ -114,6 +114,44 @@
       text-transform: uppercase; color: var(--gold);
     }
 
+    /* Single-line feedback only when needed (no green/red alert strips) */
+    .rsvp-inline-msg {
+      font-size: 0.78rem;
+      color: var(--danger);
+      margin-bottom: 1rem;
+      line-height: 1.5;
+      min-height: 0;
+    }
+    .rsvp-inline-msg.hidden { display: none !important; }
+    .rsvp-inline-msg.is-info {
+      color: var(--muted);
+    }
+    .field-required { color: var(--gold); font-weight: 500; }
+    .field-optional { opacity: 0.45; font-size: 0.85em; font-weight: 300; }
+
+    .rsvp-submit-wrap {
+      margin-top: 1.25rem;
+      display: flex;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+    .tools-row.rsvp-nav-row {
+      justify-content: space-between;
+    }
+    .tools-row.rsvp-nav-row #nextBtn {
+      margin-left: auto;
+    }
+
+    .choice-row--three {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    @media (max-width: 720px) {
+      .choice-row--three {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media (max-width: 860px) {
       .rsvp-shell { grid-template-columns: 1fr; }
       .rsvp-photo { display: none; }
@@ -160,8 +198,7 @@
 
       <!-- RIGHT — FORM PANEL -->
       <div class="rsvp-form-panel">
-        <div id="rsvp-alert" class="alert success hidden" role="status" aria-live="polite"></div>
-        <div id="rsvp-error" class="alert error hidden"   role="alert"  aria-live="assertive"></div>
+        <p id="rsvp-inline-msg" class="rsvp-inline-msg hidden" role="alert" aria-live="polite"></p>
 
         <!-- STEP INDICATOR -->
         <div class="steps" role="list" aria-label="Form progress">
@@ -181,23 +218,22 @@
               Who shall we expect?
             </h2>
 
-            <div class="field">
-              <label for="inviteCode">Invitation Code</label>
-              <input id="inviteCode" name="inviteCode" required maxlength="40"
-                     placeholder="e.g. MUG-4F92AC" autocomplete="off"
-                     spellcheck="false" />
-            </div>
             <div class="grid-2">
               <div class="field">
-                <label for="fullName">Full Name</label>
+                <label for="fullName">Full Name <span class="field-required" aria-hidden="true">*</span></label>
                 <input id="fullName" name="fullName" required maxlength="120"
-                       autocomplete="name" />
+                       autocomplete="name" aria-required="true" />
               </div>
               <div class="field">
-                <label for="email">Email Address</label>
+                <label for="email">Email Address <span class="field-required" aria-hidden="true">*</span></label>
                 <input id="email" name="email" type="email" required maxlength="180"
-                       autocomplete="email" />
+                       autocomplete="email" aria-required="true" />
               </div>
+            </div>
+            <div class="field">
+              <label for="phone">Phone <span class="field-optional">(optional)</span></label>
+              <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel"
+                     maxlength="40" placeholder="+256 …" />
             </div>
           </div>
 
@@ -210,17 +246,23 @@
 
             <div class="field">
               <label>Your Response</label>
-              <div class="choice-row" role="group" aria-label="Attendance choice">
+              <div class="choice-row choice-row--three" role="group" aria-label="Attendance choice">
                 <div class="choice" data-attend="yes" role="button" tabindex="0"
                      aria-pressed="false">
                   <span class="choice-icon" aria-hidden="true">🥂</span>
-                  <b>Joyfully Accepts</b>
+                  <b>Accept</b>
                   <span>I will be there</span>
+                </div>
+                <div class="choice" data-attend="maybe" role="button" tabindex="0"
+                     aria-pressed="false">
+                  <span class="choice-icon" aria-hidden="true">✨</span>
+                  <b>Maybe</b>
+                  <span>Not sure yet</span>
                 </div>
                 <div class="choice" data-attend="no" role="button" tabindex="0"
                      aria-pressed="false">
                   <span class="choice-icon" aria-hidden="true">💌</span>
-                  <b>Regretfully Declines</b>
+                  <b>Decline</b>
                   <span>I cannot attend</span>
                 </div>
               </div>
@@ -290,15 +332,19 @@
               <textarea id="message" name="message" maxlength="1200"
                         placeholder="Share your wishes, blessings, or love..."></textarea>
             </div>
+
+            <!-- Submit only on final step (not on steps 1–2) -->
+            <div class="rsvp-submit-wrap">
+              <button id="submitBtn" type="submit" class="btn btn-primary">
+                Send My Response 💛
+              </button>
+            </div>
           </div>
 
-          <!-- NAVIGATION BUTTONS -->
-          <div class="tools-row" style="margin-top:0.5rem;">
+          <!-- NAVIGATION: Back + Continue only (steps 1–2) -->
+          <div class="tools-row rsvp-nav-row" style="margin-top:0.5rem;">
             <button id="backBtn" type="button" class="btn hidden">← Back</button>
             <button id="nextBtn" type="button" class="btn btn-primary">Continue →</button>
-            <button id="submitBtn" type="submit" class="btn btn-primary hidden">
-              Send My Response 💛
-            </button>
           </div>
 
         </form>

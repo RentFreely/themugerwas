@@ -13,8 +13,7 @@ Production-ready hybrid wedding RSVP website with a guest-facing experience and 
 - Admin page:
   - `dashboard.html` (direct URL access; not linked in guest nav)
 - Data layer:
-  - Supabase tables and RLS in `supabase-schema.sql`
-  - Migration in `supabase/migrations/20260509131000_init_wedding_schema.sql`
+  - Supabase tables and RLS via ordered SQL in `supabase/migrations/` (see Supabase setup below)
 - Core scripts:
   - `main.js` (global interactions and transitions)
   - `rsvp.js` (submission flow and validations)
@@ -36,19 +35,21 @@ Open:
 ## Supabase setup (required)
 
 1. Create Supabase project.
-2. Apply schema:
-   - Use SQL editor with `supabase-schema.sql`, or
-   - Use migration: `supabase/migrations/20260509131000_init_wedding_schema.sql`.
+2. Apply schema (migrations are the single source of truth):
+   - **Recommended:** from this folder run `supabase link` (once) then `supabase db push`, which applies every file in `supabase/migrations/` in order; or
+   - **Manual:** in the Supabase SQL editor, run each `supabase/migrations/*.sql` file in filename order (early timestamps may be no-ops kept for history parity with hosted projects).
 3. Configure `config.js`:
    - `supabaseUrl`
    - `supabaseAnonKey` (publishable/anon only)
    - `rsvpDeadlineIso`
    - `siteBaseUrl` (or keep `window.location.origin`)
-4. Seed `guest_invites` with invite codes.
+4. RSVP mode (current): **open registration** — guests use `rsvp.html` without invitation codes. Rows are stored with `invite_code` set to `WEB` and `invite_id` null.
 
-Example invite URL:
+Optional later: per-guest codes via `guest_invites` and URL query `?guest=CODE`.
 
-`https://your-domain.com/rsvp.html?guest=MUG-4F92AC`
+RSVP URL:
+
+`https://your-domain.com/rsvp.html`
 
 ## Current deployment notes (DigitalOcean)
 
@@ -85,7 +86,7 @@ sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
 - Never expose `service_role` key in frontend code.
 - `config.js` on client should only contain publishable/anon key.
 - Keep dashboard unlinked from guest navigation.
-- Use invite codes; do not accept open anonymous RSVPs without code checks.
+- Open RSVP links can receive spam or duplicate entries; monitor the dashboard and tighten RLS or add rate limiting / captcha before wide public share if needed.
 - Keep server firewall enabled:
   - `ufw allow OpenSSH`
   - `ufw allow 'Nginx Full'`
@@ -103,8 +104,8 @@ sudo apt update && sudo apt upgrade -y
 
 ## Important RLS warning
 
-Current policies are permissive for `guest_invites` (`anon` can select/update) to keep the invite-code flow simple.
-Before a high-traffic public launch, tighten policies (or route invite validation and marking through a secured server/Edge Function) to reduce abuse risk.
+Current policies allow open inserts on `rsvps` for anon (see migration). The app previously validated rows in `guest_invites`; that is disabled for now.
+Before a high-traffic public launch, consider stricter RLS, Edge Function validation, or re-enabling invite-only codes.
 
 ## Feature notes
 
@@ -119,8 +120,7 @@ Before a high-traffic public launch, tighten policies (or route invite validatio
 - [ ] HTTPS certificate active
 - [ ] Supabase URL and anon key valid in `config.js`
 - [ ] Auth URL settings updated in Supabase
-- [ ] Invite codes seeded in `guest_invites`
-- [ ] Test RSVP submit (accept + decline)
+- [ ] Test RSVP submit with link only (accept + maybe + decline)
 - [ ] Verify dashboard login and row visibility
 - [ ] Verify edit/delete actions in dashboard
 - [ ] Test on phone (home, RSVP, details, dashboard)

@@ -8,7 +8,7 @@ One-page reference for deploy, verify, and recovery. Full context lives in [READ
 |------|--------|
 | Static root (Droplet) | `/var/www/themugerwas` |
 | Nginx site config | `/etc/nginx/sites-available/themugerwas` |
-| Supabase schema | `supabase-schema.sql` or `supabase/migrations/*` |
+| Supabase schema | `supabase/migrations/*` (use `supabase db push` when linked) |
 | Client config | `config.js` (anon/publishable key only) |
 
 Replace `YOUR_IP` and `yourdomain.com` below.
