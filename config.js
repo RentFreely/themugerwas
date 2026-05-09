@@ -4,5 +4,14 @@ window.WEDDING_CONFIG = {
   rsvpDeadlineIso: "2026-08-01T23:59:59+03:00",
   expectedGuestTotal: 200,
   siteBaseUrl: window.location.origin,
-  confirmationEmailEndpoint: ""
+  confirmationEmailEndpoint: "",
+  invitationPdf: {
+    cardImageUrl: "./public/themugerwas3.jpeg",
+    honorLine: "The honour of your presence is requested",
+    coupleNames: "Tim & Rebecca",
+    dateFormalLine: "Saturday, the twenty-ninth of August",
+    yearFormalLine: "two thousand twenty-six",
+    venueLine: "Speke Resort Munyonyo · Kampala",
+    attireLine: "Black Tie · Evening reception",
+  },
 };

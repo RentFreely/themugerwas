@@ -47,9 +47,9 @@ Open:
 
 Optional later: per-guest codes via `guest_invites` and URL query `?guest=CODE`.
 
-RSVP URL:
+RSVP URL (production):
 
-`https://your-domain.com/rsvp.html`
+`https://the-mugerwas-wedding.online/rsvp.html`
 
 ## Current deployment notes (DigitalOcean)
 
@@ -67,19 +67,45 @@ ssh root@YOUR_IP "nginx -t && systemctl reload nginx"
 
 ## Domain and HTTPS
 
-1. Point DNS records:
-   - `A @ -> your_droplet_ip`
-   - `A www -> your_droplet_ip` (or `CNAME www -> @`)
-2. Install certbot and issue cert:
+Production domain: **`the-mugerwas-wedding.online`** (Namecheap). Point it at your DigitalOcean droplet’s **public IPv4** (verify in the Droplet dashboard; it was `164.92.131.118` when this site was last deployed—confirm before typing DNS).
+
+### 1. DNS at Namecheap
+
+1. Namecheap → **Domain List** → **Manage** next to `the-mugerwas-wedding.online`.
+2. Open the **Advanced DNS** tab.
+3. Remove any **URL Redirect** / parking records that conflict with your site.
+4. Add:
+   - **A Record** · Host `@` · Value **your droplet IPv4** · TTL Automatic (or 30 min).
+   - **A Record** · Host `www` · Value **same IPv4** · TTL Automatic.
+
+   (Alternatively, some setups use a **CNAME** for `www` pointing to `the-mugerwas-wedding.online.` — either works if Namecheap allows it alongside your other records.)
+
+5. Wait for propagation (often minutes, sometimes up to a few hours). Check with `dig the-mugerwas-wedding.online +short` or an online DNS checker.
+
+### 2. Nginx + Let’s Encrypt on the droplet
+
+Ensure your site’s `server_name` includes the domain, then obtain certificates:
 
 ```bash
+sudo nano /etc/nginx/sites-available/themugerwas
+# Ensure: server_name the-mugerwas-wedding.online www.the-mugerwas-wedding.online;
+sudo nginx -t && sudo systemctl reload nginx
+
 sudo apt install certbot python3-certbot-nginx -y
-sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+sudo certbot --nginx -d the-mugerwas-wedding.online -d www.the-mugerwas-wedding.online
 ```
 
-3. In Supabase Auth settings:
-   - Site URL: `https://yourdomain.com`
-   - Additional redirect URLs: `https://www.yourdomain.com`
+### 3. Supabase Auth (dashboard)
+
+In **Authentication → URL Configuration**:
+
+- **Site URL:** `https://the-mugerwas-wedding.online`
+- **Additional redirect URLs:** include both  
+  `https://www.the-mugerwas-wedding.online`  
+  and `https://the-mugerwas-wedding.online`  
+  (and any dev URLs you still use, e.g. `http://localhost:8765` if you test auth locally).
+
+This repo also keeps `[auth].site_url` and `[auth].additional_redirect_urls` in `supabase/config.toml`; running **`supabase config push`** from this folder applies them to the linked hosted project (same effect as manual Dashboard edits when kept in sync).
 
 ## Security essentials (do not skip)
 
@@ -116,10 +142,10 @@ Before a high-traffic public launch, consider stricter RLS, Edge Function valida
 
 ## Go-live checklist
 
-- [ ] Domain resolves to server IP
-- [ ] HTTPS certificate active
-- [ ] Supabase URL and anon key valid in `config.js`
-- [ ] Auth URL settings updated in Supabase
+- [x] DNS for `the-mugerwas-wedding.online` (and `www`) points to the droplet IP
+- [x] HTTPS certificate active (certbot)
+- [x] Supabase URL and anon key valid in `config.js`
+- [x] Supabase Auth Site URL / redirect URLs include the production domain (via Dashboard **or** `supabase config push` from `[auth]` in `supabase/config.toml`)
 - [ ] Test RSVP submit with link only (accept + maybe + decline)
 - [ ] Verify dashboard login and row visibility
 - [ ] Verify edit/delete actions in dashboard

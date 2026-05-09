@@ -19,6 +19,11 @@
   const attendChoices = [...document.querySelectorAll(".choice[data-attend]")];
   const attendingInput = document.getElementById("attending");
   const attendingFields = document.getElementById("attending-fields");
+  const downloadInvitationBtn = document.getElementById("downloadInvitationBtn");
+  const confirmPdfNote = document.getElementById("confirm-pdf-note");
+
+  /** Last successful RSVP payload — used to regenerate the PDF on demand */
+  let lastInvitationPayload = null;
 
   const pulsePortal = () => {
     document.body.classList.add("portal-in");
@@ -86,14 +91,210 @@
 
   const wantsSeatsAndMeal = (v) => v === "yes" || v === "maybe";
 
+  const defaultInvitationPdf = () => ({
+    cardImageUrl: "./public/themugerwas3.jpeg",
+    honorLine: "The honour of your presence is requested",
+    coupleNames: "Tim & Rebecca",
+    dateFormalLine: "Saturday, the twenty-ninth of August",
+    yearFormalLine: "two thousand twenty-six",
+    venueLine: "Speke Resort Munyonyo · Kampala",
+    attireLine: "Black Tie · Evening reception",
+  });
+
+  /**
+   * Fills the off-screen invitation card and renders a 5×7 in PDF (luxury print style).
+   * @returns {Promise<boolean>}
+   */
+  const generateInvitationPdf = async (payload) => {
+    if (typeof html2canvas !== "function" || (!window.jspdf?.jsPDF && !window.jsPDF)) {
+      return false;
+    }
+
+    const ic = { ...defaultInvitationPdf(), ...(cfg.invitationPdf || {}) };
+    const photo = document.getElementById("pdf-card-photo");
+    const honorEl = document.getElementById("pdf-honor-line");
+    const namesEl = document.getElementById("pdf-couple-names");
+    const dateEl = document.getElementById("pdf-date-block");
+    const guestEl = document.getElementById("pdf-guest-name");
+    const rsvpHeadEl = document.getElementById("pdf-rsvp-headline");
+    const rsvpDetailEl = document.getElementById("pdf-rsvp-detail");
+    const partyEl = document.getElementById("pdf-party-line");
+    const mealEl = document.getElementById("pdf-meal-line");
+    const venueEl = document.getElementById("pdf-venue-block");
+    const card = document.getElementById("pdf-invitation-card");
+
+    if (!photo || !guestEl || !card || !venueEl || !honorEl || !namesEl || !dateEl || !rsvpHeadEl || !partyEl || !mealEl || !rsvpDetailEl) {
+      return false;
+    }
+
+    honorEl.textContent = ic.honorLine;
+    namesEl.textContent = ic.coupleNames;
+    dateEl.textContent = "";
+    const d1 = document.createElement("span");
+    d1.style.display = "block";
+    d1.textContent = ic.dateFormalLine;
+    const d2 = document.createElement("span");
+    d2.style.display = "block";
+    d2.textContent = ic.yearFormalLine;
+    dateEl.appendChild(d1);
+    dateEl.appendChild(d2);
+    guestEl.textContent = payload.full_name || "Guest";
+
+    const att = payload.attending;
+    let headline = "";
+    let detail = "";
+    if (att === "yes") {
+      headline = "Joyfully accepts";
+    } else if (att === "maybe") {
+      headline = "Response noted";
+      detail = "Tentative — plans may change";
+    } else {
+      headline = "With regrets";
+      detail = "Unable to attend";
+    }
+    rsvpHeadEl.textContent = headline;
+    if (detail && att !== "yes") {
+      rsvpDetailEl.textContent = detail;
+      rsvpDetailEl.classList.remove("hidden");
+    } else {
+      rsvpDetailEl.textContent = "";
+      rsvpDetailEl.classList.add("hidden");
+    }
+
+    const showParty = wantsSeatsAndMeal(att);
+    const n = Number(payload.guest_count || 0);
+    if (showParty && n >= 1) {
+      partyEl.textContent = n === 1 ? "Party of one" : `Party of ${n}`;
+      partyEl.classList.remove("hidden");
+    } else {
+      partyEl.textContent = "";
+      partyEl.classList.add("hidden");
+    }
+
+    if (showParty && payload.meal) {
+      mealEl.textContent = `Dinner · ${payload.meal}`;
+      mealEl.classList.remove("hidden");
+    } else {
+      mealEl.textContent = "";
+      mealEl.classList.add("hidden");
+    }
+
+    venueEl.innerHTML = "";
+    const v1 = document.createElement("span");
+    v1.textContent = ic.venueLine;
+    const v2 = document.createElement("span");
+    v2.textContent = ic.attireLine;
+    venueEl.appendChild(v1);
+    venueEl.appendChild(v2);
+
+    const resolvedImg = new URL(ic.cardImageUrl || defaultInvitationPdf().cardImageUrl, window.location.href).href;
+    photo.crossOrigin = "anonymous";
+    if (photo.src !== resolvedImg) {
+      photo.src = resolvedImg;
+    }
+    await new Promise((resolve) => {
+      const done = () => {
+        photo.removeEventListener("load", done);
+        photo.removeEventListener("error", done);
+        resolve();
+      };
+      if (photo.complete && photo.naturalWidth > 0) {
+        queueMicrotask(done);
+        return;
+      }
+      photo.addEventListener("load", done, { once: true });
+      photo.addEventListener("error", done, { once: true });
+    });
+
+    if (photo.decode) {
+      try {
+        await photo.decode();
+      } catch {
+        /* ignore */
+      }
+    }
+
+    await document.fonts.ready;
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    const canvas = await html2canvas(card, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: "#050506",
+      logging: false,
+    });
+
+    const PdfCtor = window.jspdf?.jsPDF || window.jsPDF;
+    if (!PdfCtor) return false;
+    const pdf = new PdfCtor({ orientation: "portrait", unit: "in", format: [5, 7] });
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const imgData = canvas.toDataURL("image/jpeg", 0.92);
+    pdf.addImage(imgData, "JPEG", 0, 0, pageW, pageH, undefined, "FAST");
+    pdf.save("The-Mugerwas-Invitation.pdf");
+    return true;
+  };
+
   attendChoices.forEach((choice) => {
     choice.addEventListener("click", () => {
       attendChoices.forEach((item) => item.classList.remove("active"));
       choice.classList.add("active");
       attendingInput.value = choice.dataset.attend;
       attendingFields.classList.toggle("hidden", choice.dataset.attend === "no");
+      if (choice.dataset.attend === "no") {
+        mealCards.forEach((c) => c.classList.remove("active"));
+        if (mealInput) mealInput.value = "";
+      }
       softClick();
       pulsePortal();
+    });
+  });
+
+  /** Seats (including yourself) — stepper updates hidden `guestCount` */
+  const guestCountInput = document.getElementById("guestCount");
+  const seatVal = document.getElementById("seat-val");
+  const seatUp = document.getElementById("seat-up");
+  const seatDown = document.getElementById("seat-down");
+  const MIN_GUESTS = 1;
+  const MAX_GUESTS = 40;
+
+  const syncSeatButtons = () => {
+    const n = Number(guestCountInput?.value || 1);
+    if (seatDown) seatDown.disabled = n <= MIN_GUESTS;
+    if (seatUp) seatUp.disabled = n >= MAX_GUESTS;
+  };
+
+  const setGuestCount = (raw) => {
+    if (!guestCountInput || !seatVal) return;
+    const v = Math.max(MIN_GUESTS, Math.min(MAX_GUESTS, Math.round(Number(raw))));
+    guestCountInput.value = String(v);
+    seatVal.textContent = String(v);
+    syncSeatButtons();
+  };
+
+  if (guestCountInput && seatVal) {
+    setGuestCount(guestCountInput.value || 1);
+    seatUp?.addEventListener("click", () => setGuestCount(Number(guestCountInput.value || 1) + 1));
+    seatDown?.addEventListener("click", () => setGuestCount(Number(guestCountInput.value || 1) - 1));
+  }
+
+  /** Meal preference cards → hidden `#meal` */
+  const mealCards = [...document.querySelectorAll(".meal-card[data-meal]")];
+  const mealInput = document.getElementById("meal");
+  mealCards.forEach((card) => {
+    card.addEventListener("click", () => {
+      mealCards.forEach((c) => c.classList.remove("active"));
+      card.classList.add("active");
+      mealInput.value = card.dataset.meal || "";
+      softClick();
+      pulsePortal();
+    });
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        card.click();
+      }
     });
   });
 
@@ -177,13 +378,9 @@
       submitted_at: new Date().toISOString(),
     };
 
-    const { data: inserted, error: insertErr } = await sb
-      .from("rsvps")
-      .insert(payload)
-      .select("id")
-      .single();
+    const { error: insertErr } = await sb.from("rsvps").insert(payload);
 
-    if (insertErr || !inserted) {
+    if (insertErr) {
       showInline(insertErr?.message || "Something went wrong. Please try again.");
       submitBtn.disabled = false;
       submitBtn.textContent = defaultSubmitLabel;
@@ -201,6 +398,8 @@
     clearInline();
     if (stepsBar) stepsBar.hidden = true;
     form.hidden = true;
+    lastInvitationPayload = payload;
+
     if (confirmScreen) {
       const msgEl = document.getElementById("confirm-msg");
       if (msgEl) {
@@ -217,7 +416,32 @@
 
     submitBtn.disabled = false;
     submitBtn.textContent = defaultSubmitLabel;
+
+    if (confirmPdfNote) confirmPdfNote.classList.add("hidden");
+    if (downloadInvitationBtn) downloadInvitationBtn.classList.add("hidden");
+
+    queueMicrotask(async () => {
+      try {
+        const ok = await generateInvitationPdf(payload);
+        if (ok && confirmPdfNote) confirmPdfNote.classList.remove("hidden");
+      } catch {
+        /* PDF is optional */
+      }
+      if (downloadInvitationBtn) downloadInvitationBtn.classList.remove("hidden");
+    });
   });
+
+  if (downloadInvitationBtn) {
+    downloadInvitationBtn.addEventListener("click", async () => {
+      if (!lastInvitationPayload) return;
+      downloadInvitationBtn.disabled = true;
+      try {
+        await generateInvitationPdf(lastInvitationPayload);
+      } finally {
+        downloadInvitationBtn.disabled = false;
+      }
+    });
+  }
 
   updateStep();
 })();

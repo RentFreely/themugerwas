@@ -10,8 +10,9 @@ One-page reference for deploy, verify, and recovery. Full context lives in [READ
 | Nginx site config | `/etc/nginx/sites-available/themugerwas` |
 | Supabase schema | `supabase/migrations/*` (use `supabase db push` when linked) |
 | Client config | `config.js` (anon/publishable key only) |
+| Production domain | `the-mugerwas-wedding.online` (DNS → droplet public IPv4) |
 
-Replace `YOUR_IP` and `yourdomain.com` below.
+Replace `YOUR_IP` below if you SSH by IP; confirm the IPv4 in the DigitalOcean control panel.
 
 ---
 
@@ -35,7 +36,8 @@ curl -I "http://YOUR_IP/dashboard.html"
 With HTTPS after certbot:
 
 ```bash
-curl -I "https://yourdomain.com/"
+curl -I "https://the-mugerwas-wedding.online/"
+curl -I "https://the-mugerwas-wedding.online/rsvp.html"
 ```
 
 ---

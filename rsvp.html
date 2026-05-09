@@ -157,9 +157,124 @@
       .rsvp-photo { display: none; }
       .rsvp-form-panel { min-height: auto; padding: 1.5rem 1rem; }
     }
+
+    /* ── PDF invitation (off-screen, captured for download) ───────── */
+    .pdf-invitation-root {
+      position: fixed; left: -20000px; top: 0; z-index: 0; pointer-events: none;
+      width: 540px; height: 756px; overflow: hidden; background: #030304;
+    }
+    .pdf-invitation-card {
+      width: 540px; height: 756px; box-sizing: border-box;
+      background: #050506;
+      border: 1px solid #2a2418;
+      box-shadow: inset 0 0 0 1px rgba(201, 168, 76, 0.22);
+      display: flex; flex-direction: column;
+      color: #f2f0ec;
+    }
+    .pdf-invitation-photo-wrap {
+      position: relative; height: 330px; flex-shrink: 0; overflow: hidden;
+      background: #0a0a0c;
+    }
+    .pdf-invitation-photo-wrap img {
+      width: 100%; height: 100%; object-fit: cover; object-position: center 18%;
+      display: block;
+    }
+    .pdf-invitation-photo-wrap::after {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(5, 5, 6, 0) 40%,
+        rgba(5, 5, 6, 0.5) 100%
+      );
+    }
+    .pdf-invitation-gold-join {
+      height: 3px; flex-shrink: 0;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(201, 168, 76, 0.15) 20%,
+        #c9a84c 50%,
+        rgba(201, 168, 76, 0.15) 80%,
+        transparent 100%
+      );
+    }
+    .pdf-invitation-panel {
+      flex: 1; padding: 26px 34px 30px; text-align: center;
+      display: flex; flex-direction: column; justify-content: flex-start;
+      gap: 6px;
+    }
+    .pdf-invitation-eyebrow {
+      font-family: Jost, system-ui, sans-serif;
+      font-size: 9px; font-weight: 500; letter-spacing: 0.42em;
+      text-transform: uppercase; color: rgba(201, 168, 76, 0.95); margin: 0;
+      line-height: 1.5;
+    }
+    .pdf-invitation-names {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 38px; font-weight: 300; font-style: italic;
+      color: #faf8f4; margin: 4px 0 2px; line-height: 1.05; letter-spacing: 0.02em;
+    }
+    .pdf-invitation-date {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 17px; font-weight: 300; font-style: italic;
+      color: rgba(242, 240, 236, 0.82); margin: 0; line-height: 1.45;
+    }
+    .pdf-invitation-rule {
+      width: 72px; height: 1px; margin: 14px auto 12px;
+      background: linear-gradient(90deg, transparent, #c9a84c, transparent);
+      opacity: 0.85;
+    }
+    .pdf-invitation-guest {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 24px; font-weight: 400; font-style: italic;
+      color: #fff; margin: 0; line-height: 1.25;
+    }
+    .pdf-invitation-rsvp {
+      font-family: Jost, system-ui, sans-serif;
+      font-size: 10px; font-weight: 500; letter-spacing: 0.28em;
+      text-transform: uppercase; color: rgba(201, 168, 76, 0.9); margin: 10px 0 0;
+    }
+    .pdf-invitation-rsvp-detail {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 13px; font-style: italic; font-weight: 300;
+      color: rgba(242, 240, 236, 0.55); margin: 6px 0 0; line-height: 1.4;
+    }
+    .pdf-invitation-meta {
+      margin-top: auto; padding-top: 14px;
+      font-family: Jost, system-ui, sans-serif;
+      font-size: 8.5px; font-weight: 400; letter-spacing: 0.22em;
+      text-transform: uppercase; color: rgba(242, 240, 236, 0.38); line-height: 1.8;
+    }
+    .pdf-invitation-meta span { display: block; }
+    .pdf-invitation-watermark {
+      font-family: Jost, sans-serif; font-size: 7px; letter-spacing: 0.35em;
+      text-transform: uppercase; color: rgba(255,255,255,0.12); margin-top: 12px;
+    }
   </style>
 </head>
 <body data-page="rsvp">
+
+  <!-- Captured as a 5×7 style PDF after successful RSVP (hidden off-screen) -->
+  <div id="pdf-invitation-root" class="pdf-invitation-root" aria-hidden="true">
+    <div id="pdf-invitation-card" class="pdf-invitation-card">
+      <div class="pdf-invitation-photo-wrap">
+        <img id="pdf-card-photo" src="./public/themugerwas3.jpeg" alt="" crossorigin="anonymous" width="540" height="330" />
+      </div>
+      <div class="pdf-invitation-gold-join" aria-hidden="true"></div>
+      <div class="pdf-invitation-panel">
+        <p class="pdf-invitation-eyebrow" id="pdf-honor-line"></p>
+        <p class="pdf-invitation-names" id="pdf-couple-names"></p>
+        <p class="pdf-invitation-date" id="pdf-date-block"></p>
+        <div class="pdf-invitation-rule" aria-hidden="true"></div>
+        <p class="pdf-invitation-guest" id="pdf-guest-name"></p>
+        <p class="pdf-invitation-rsvp" id="pdf-rsvp-headline"></p>
+        <p class="pdf-invitation-rsvp-detail hidden" id="pdf-rsvp-detail"></p>
+        <p class="pdf-invitation-rsvp-detail hidden" id="pdf-party-line"></p>
+        <p class="pdf-invitation-rsvp-detail hidden" id="pdf-meal-line"></p>
+        <div class="pdf-invitation-meta" id="pdf-venue-block"></div>
+        <p class="pdf-invitation-watermark">The Mugerwas</p>
+      </div>
+    </div>
+  </div>
 
   <!-- PORTAL -->
   <div class="portal-layer" id="portal-layer" aria-hidden="true">
@@ -359,8 +474,10 @@
           <p class="confirm-title" id="confirm-title">Thank You</p>
           <p class="confirm-subtitle" id="confirm-subtitle">Response received</p>
           <p class="confirm-msg"   id="confirm-msg"></p>
+          <p id="confirm-pdf-note" class="confirm-pdf-note hidden" style="font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top:0.9rem;">Your formal invitation card was saved as a PDF.</p>
           <div class="confirm-chip">29 August 2026 &nbsp;·&nbsp; Kampala</div>
           <div style="margin-top:1.4rem;display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;">
+            <button type="button" class="btn hidden" id="downloadInvitationBtn">Download invitation (PDF)</button>
             <a class="btn btn-primary" href="./details.html">View Event Details →</a>
             <a class="btn" href="./index.html">Back to Home</a>
           </div>
@@ -370,6 +487,8 @@
     </div><!-- end rsvp-shell -->
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./config.js"></script>
   <script src="./main.js"></script>
