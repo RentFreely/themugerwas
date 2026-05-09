@@ -476,24 +476,86 @@ body.portal-in .portal-ring-c { animation-delay: 110ms; }
 }
 
 /* ── SHARE ROW ───────────────────────────────────────────────── */
-.share-box {
+.share-panel {
   border: 1px solid var(--line-dim); background: var(--surface);
-  padding: 1.2rem 1.25rem;
-  display: flex; justify-content: space-between;
-  align-items: center; gap: 1rem; flex-wrap: wrap;
+  padding: 1.35rem 1.4rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1.5rem 2rem;
+  align-items: center;
   position: relative;
 }
-.share-box::before {
+.share-panel::before {
   content: ''; position: absolute;
   top: 0; left: 10%; right: 10%; height: 1px;
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
 }
-.share-box h3 {
+.share-panel-copy h3 {
   font-family: 'Cormorant Garamond', serif;
   font-style: italic;
   font-size: 1.42rem;
   font-weight: 400;
   line-height: 1.14;
+}
+.share-panel-lead {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-top: 0.35rem;
+  line-height: 1.55;
+  max-width: 52ch;
+}
+.share-actions {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+.share-panel-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+.share-qr-caption {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.share-qr-host {
+  padding: 0.45rem;
+  background: rgba(250, 246, 239, 0.55);
+  border: 1px solid var(--line-dim);
+  border-radius: 6px;
+}
+.share-qr-host canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.share-qr-download {
+  font-size: 0.78rem;
+  padding: 0.55rem 1rem;
+}
+.share-qr-fallback {
+  font-size: 0.78rem;
+  color: var(--muted);
+  max-width: 15rem;
+  margin: 0;
+  line-height: 1.45;
+}
+@media (max-width: 720px) {
+  .share-panel {
+    grid-template-columns: 1fr;
+    justify-items: stretch;
+  }
+  .share-panel-qr {
+    justify-self: center;
+    padding-top: 0.25rem;
+  }
 }
 .wa-btn { display: inline-flex; align-items: center; gap: 0.45rem; }
 .wa-btn svg { width: 1rem; height: 1rem; fill: currentColor; }

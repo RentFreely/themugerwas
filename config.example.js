@@ -4,6 +4,10 @@ window.WEDDING_CONFIG = {
   rsvpDeadlineIso: "2026-08-01T23:59:59+03:00",
   expectedGuestTotal: 200,
   siteBaseUrl: "https://your-domain.com",
+  /* Optional: URL encoded in the share QR (default: siteBaseUrl + /rsvp.html). Use a full https URL or a path like "/rsvp.html". */
+  // shareQrDataUrl: "",
+  /* Optional: centre image inside the QR (default: invitationPdf.cardImageUrl). */
+  // qrCenterImageUrl: "./public/themugerwas2.jpeg",
   confirmationEmailEndpoint: "/functions/v1/send-rsvp-confirmation",
   invitationPdf: {
     cardImageUrl: "./public/themugerwas2.jpeg",

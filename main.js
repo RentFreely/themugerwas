@@ -297,16 +297,75 @@
     setInterval(render, 1000);
   }
 
+  /* ── SHARE URLS + RSVP QR (home) ───────────────────────────── */
+  function weddingShareUrls() {
+    const cfg = window.WEDDING_CONFIG || {};
+    const base = String(cfg.siteBaseUrl || window.location.origin).replace(/\/$/, '');
+    let rsvpUrl = base + '/rsvp.html';
+    if (cfg.shareQrDataUrl && String(cfg.shareQrDataUrl).trim()) {
+      const s = String(cfg.shareQrDataUrl).trim();
+      rsvpUrl = s.indexOf('http') === 0 ? s : base + '/' + s.replace(/^\//, '');
+    }
+    const sharePageUrl = base + '/#share';
+    let qrImg = (cfg.invitationPdf && cfg.invitationPdf.cardImageUrl) || './public/themugerwas2.jpeg';
+    if (cfg.qrCenterImageUrl && String(cfg.qrCenterImageUrl).trim()) {
+      qrImg = String(cfg.qrCenterImageUrl).trim();
+    }
+    const qrImageAbs = qrImg.indexOf('http') === 0 ? qrImg : new URL(qrImg, window.location.href).href;
+    return { base, rsvpUrl, sharePageUrl, qrImageAbs };
+  }
+
+  const shareQrHost = document.getElementById('share-qr-host');
+  const shareQrDownload = document.getElementById('share-qr-download');
+  if (shareQrHost && typeof QRCodeStyling !== 'undefined') {
+    const { rsvpUrl, qrImageAbs } = weddingShareUrls();
+    const qrCode = new QRCodeStyling({
+      width: 280,
+      height: 280,
+      type: 'canvas',
+      data: rsvpUrl,
+      margin: 4,
+      qrOptions: { errorCorrectionLevel: 'H' },
+      imageOptions: {
+        crossOrigin: 'anonymous',
+        margin: 5,
+        hideBackgroundDots: true,
+        imageSize: 0.38,
+      },
+      dotsOptions: { color: '#1c1814', type: 'rounded' },
+      cornersSquareOptions: { color: '#b8945a', type: 'extra-rounded' },
+      cornersDotOptions: { color: '#8b6914', type: 'rounded' },
+      backgroundOptions: { color: '#faf6ef' },
+      image: qrImageAbs,
+    });
+    qrCode.append(shareQrHost);
+    if (shareQrDownload) {
+      shareQrDownload.addEventListener('click', () => {
+        qrCode.download({ name: 'the-mugerwas-rsvp-qr', extension: 'png' });
+      });
+    }
+  } else if (shareQrHost) {
+    shareQrHost.innerHTML =
+      '<p class="share-qr-fallback">QR could not load — please share the RSVP link from the button above, or open this page on a connection that allows scripts.</p>';
+    if (shareQrDownload) shareQrDownload.disabled = true;
+  }
+
   /* ── WHATSAPP SHARE ────────────────────────────────────────── */
   const waBtn = document.getElementById('wa-share');
   if (waBtn) {
     waBtn.addEventListener('click', () => {
-      const cfg  = window.WEDDING_CONFIG || {};
-      const url  = cfg.siteUrl || window.location.origin;
-      const msg  = encodeURIComponent(
-        `You are warmly invited to Tim & Rebecca's wedding.\nRSVP here: ${url}/rsvp.html`
+      const { rsvpUrl, sharePageUrl } = weddingShareUrls();
+      const msg = encodeURIComponent(
+        'You are cordially invited to celebrate with Tim & Rebecca Mugerwa.\n\n' +
+        'Saturday, 29 August 2026 · Kampala, Uganda\n' +
+        'Black tie · Kindly RSVP by 1 August 2026\n\n' +
+        'RSVP here:\n' +
+        rsvpUrl +
+        '\n\n' +
+        'Our invitation page also has a QR you can save and pass along:\n' +
+        sharePageUrl
       );
-      window.open(`https://wa.me/?text=${msg}`, '_blank', 'noopener,noreferrer');
+      window.open('https://wa.me/?text=' + msg, '_blank', 'noopener,noreferrer');
     });
   }
 

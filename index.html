@@ -137,23 +137,33 @@
     </section>
 
     <!-- SHARE ──────────────────────────────────────── -->
-    <section class="share reveal" aria-label="Share invitation">
+    <section id="share" class="share reveal" aria-label="Share invitation">
       <div class="section-shell">
-        <div class="share-box">
-          <div>
+        <div class="share-panel">
+          <div class="share-panel-copy">
             <span class="section-tag">Share Invitation</span>
-            <h3>Send this invitation on WhatsApp</h3>
-            <p style="color:var(--muted);font-size:0.82rem;margin-top:0.3rem;">
-              Know someone who should be there? Share the link.
+            <h3>Share the joy — words, link, or QR</h3>
+            <p class="share-panel-lead">
+              Know someone who should be there? Send a thoughtful note on WhatsApp, or save our QR — perfect for Instagram stories, chats, or print.
             </p>
+            <div class="share-actions">
+              <button id="wa-share" class="btn btn-primary wa-btn" type="button"
+                      aria-label="Share invitation on WhatsApp">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12.04 2C6.58 2 2.14 6.36 2.14 11.73c0 1.87.54 3.69 1.56 5.26L2 22l5.18-1.66a10 10 0 0 0 4.86 1.25h.01c5.46 0 9.9-4.36 9.9-9.73C21.95 6.36 17.5 2 12.04 2zm0 17.75a8.2 8.2 0 0 1-4.16-1.13l-.3-.17-3.07.98.99-2.98-.19-.31a8 8 0 0 1-1.25-4.26c0-4.45 3.62-8.07 8.08-8.07 4.45 0 8.07 3.62 8.07 8.07 0 4.45-3.62 8.07-8.07 8.07zm4.43-6.05c-.24-.12-1.43-.7-1.65-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1-.37-1.91-1.19-.7-.62-1.18-1.38-1.32-1.62-.14-.24-.01-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.28-.74-1.76-.2-.47-.4-.4-.54-.4h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.69 2.57 4.1 3.61.57.25 1.02.4 1.36.51.57.18 1.08.16 1.49.1.45-.07 1.43-.58 1.63-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28z"/>
+                </svg>
+                <span>Share on WhatsApp</span>
+              </button>
+            </div>
           </div>
-          <button id="wa-share" class="btn btn-primary wa-btn" type="button"
-                  aria-label="Share invitation on WhatsApp">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M12.04 2C6.58 2 2.14 6.36 2.14 11.73c0 1.87.54 3.69 1.56 5.26L2 22l5.18-1.66a10 10 0 0 0 4.86 1.25h.01c5.46 0 9.9-4.36 9.9-9.73C21.95 6.36 17.5 2 12.04 2zm0 17.75a8.2 8.2 0 0 1-4.16-1.13l-.3-.17-3.07.98.99-2.98-.19-.31a8 8 0 0 1-1.25-4.26c0-4.45 3.62-8.07 8.08-8.07 4.45 0 8.07 3.62 8.07 8.07 0 4.45-3.62 8.07-8.07 8.07zm4.43-6.05c-.24-.12-1.43-.7-1.65-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1-.37-1.91-1.19-.7-.62-1.18-1.38-1.32-1.62-.14-.24-.01-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.28-.74-1.76-.2-.47-.4-.4-.54-.4h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.69 2.57 4.1 3.61.57.25 1.02.4 1.36.51.57.18 1.08.16 1.49.1.45-.07 1.43-.58 1.63-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28z"/>
-            </svg>
-            <span>Share on WhatsApp</span>
-          </button>
+          <div class="share-panel-qr">
+            <p class="share-qr-caption">Scan or download</p>
+            <div id="share-qr-host" class="share-qr-host" aria-label="QR code that opens the RSVP page"></div>
+            <button id="share-qr-download" class="btn share-qr-download" type="button"
+                    aria-label="Download QR code as PNG">
+              Download QR (PNG)
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -168,6 +178,7 @@
 
   <!-- CONFIG must come before scripts -->
   <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
   <script src="./main.js"></script>
 </body>
 </html>
