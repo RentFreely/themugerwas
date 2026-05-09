@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Wedding rings">
+  <defs>
+    <linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8d5a3"/>
+      <stop offset="45%" stop-color="#c9a84c"/>
+      <stop offset="100%" stop-color="#8b6914"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="8" fill="#06060a"/>
+  <!-- Interlocking bands (reads clearly at 1632px) -->
+  <circle cx="12.5" cy="16" r="6.25" fill="none" stroke="url(#ring)" stroke-width="2.15" stroke-linecap="round"/>
+  <circle cx="19.5" cy="16" r="6.25" fill="none" stroke="url(#ring)" stroke-width="2.15" stroke-linecap="round" opacity="0.92"/>
+</svg>
