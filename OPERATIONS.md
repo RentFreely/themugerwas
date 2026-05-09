@@ -29,15 +29,15 @@ ssh root@YOUR_IP "chmod -R a+rX /var/www/themugerwas && nginx -t && systemctl re
 
 ```bash
 curl -I "http://YOUR_IP/"
-curl -I "http://YOUR_IP/rsvp.html"
-curl -I "http://YOUR_IP/dashboard.html"
+curl -I "http://YOUR_IP/rsvp"
+curl -I "http://YOUR_IP/dashboard"
 ```
 
 With HTTPS after certbot:
 
 ```bash
 curl -I "https://the-mugerwas-wedding.online/"
-curl -I "https://the-mugerwas-wedding.online/rsvp.html"
+curl -I "https://the-mugerwas-wedding.online/rsvp"
 ```
 
 ---

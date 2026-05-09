@@ -92,7 +92,7 @@
   const wantsSeatsAndMeal = (v) => v === "yes" || v === "maybe";
 
   const defaultInvitationPdf = () => ({
-    cardImageUrl: "./public/themugerwas2.jpeg",
+    cardImageUrl: "/public/themugerwas2.jpeg",
     honorLine: "The honour of your presence is requested",
     coupleNames: "Tim & Rebecca",
     dateFormalLine: "Saturday, the twenty-ninth of August",

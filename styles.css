@@ -40,6 +40,7 @@ body {
   font-family: 'Jost', system-ui, sans-serif;
   font-weight: 300;
   min-height: 100dvh;
+  min-height: 100svh;
   overflow-x: hidden;
   cursor: none;
 }
@@ -145,7 +146,11 @@ body.portal-in .portal-ring-c { animation-delay: 110ms; }
   position: fixed; inset: 0; z-index: 30;
   background: rgba(6, 6, 10, 0.82);
   backdrop-filter: blur(4px);
-  display: grid; place-items: center; padding: 1rem;
+  display: grid; place-items: center;
+  padding-top: max(1rem, env(safe-area-inset-top, 0px));
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  padding-left: max(1rem, env(safe-area-inset-left, 0px));
+  padding-right: max(1rem, env(safe-area-inset-right, 0px));
   transition: opacity 0.5s var(--ease), visibility 0.5s;
 }
 .welcome-overlay.hidden {
@@ -190,7 +195,11 @@ body.portal-in .portal-ring-c { animation-delay: 110ms; }
   background: rgba(6, 6, 10, 0.75);
   border-bottom: 1px solid var(--line-dim);
   display: flex; justify-content: space-between; align-items: center;
-  padding: 1rem clamp(1rem, 5vw, 2.5rem);
+  gap: 0.75rem;
+  padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
+  padding-bottom: 0.75rem;
+  padding-left: max(clamp(1rem, 5vw, 2.5rem), env(safe-area-inset-left, 0px));
+  padding-right: max(clamp(1rem, 5vw, 2.5rem), env(safe-area-inset-right, 0px));
   transition: border-color 0.4s;
 }
 .top-nav:hover { border-bottom-color: rgba(201, 168, 76, 0.14); }
@@ -202,7 +211,13 @@ body.portal-in .portal-ring-c { animation-delay: 110ms; }
   transition: opacity 0.3s;
 }
 .brand:hover { opacity: 0.9; }
-.top-nav nav { display: flex; gap: 1.4rem; align-items: center; }
+.top-nav nav {
+  display: flex;
+  gap: clamp(0.65rem, 2.5vw, 1.4rem);
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
 .top-nav nav a {
   color: var(--muted); text-decoration: none;
   text-transform: uppercase; letter-spacing: 0.14em;
@@ -214,10 +229,13 @@ body.portal-in .portal-ring-c { animation-delay: 110ms; }
 
 /* ── BUTTONS ─────────────────────────────────────────────────── */
 .btn {
-  display: inline-flex; align-items: center; gap: 0.4rem;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 0.4rem;
   border: 1px solid var(--line);
   background: transparent; color: var(--text);
   text-decoration: none; padding: 0.72rem 1.2rem;
+  min-height: 44px;
+  box-sizing: border-box;
   cursor: none; letter-spacing: 0.14em;
   text-transform: uppercase;
   font-size: 0.62rem;
@@ -257,13 +275,17 @@ body.portal-in .portal-ring-c { animation-delay: 110ms; }
 
 /* ── HERO ────────────────────────────────────────────────────── */
 .hero {
-  min-height: calc(100dvh - 64px);
+  min-height: calc(100dvh - 4rem);
+  min-height: calc(100svh - 4rem);
   display: grid;
   place-items: center;
-  padding: clamp(2.25rem, 5vw, 3.25rem) 1rem;
+  padding:
+    clamp(1.75rem, 4.5vw, 3rem)
+    clamp(0.85rem, 4vw, 1.5rem)
+    max(1.5rem, env(safe-area-inset-bottom, 0px));
 }
 .hero-inner {
-  width: min(760px, 92vw);
+  width: min(760px, calc(92vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
   text-align: center;
   position: relative;
 }
@@ -273,7 +295,7 @@ body.portal-in .portal-ring-c { animation-delay: 110ms; }
 }
 .hero-inner-bg {
   background: linear-gradient(155deg, rgba(201,168,76,0.07), rgba(6,6,10,0.7));
-  padding: clamp(1.8rem, 4.4vw, 3rem);
+  padding: clamp(1.55rem, 3.8vw, 3rem) clamp(1.1rem, 3.5vw, 2.75rem);
 }
 .kicker {
   letter-spacing: 0.28em; text-transform: uppercase;
@@ -311,13 +333,18 @@ body.portal-in .portal-ring-c { animation-delay: 110ms; }
 
 /* ── COUNTDOWN ───────────────────────────────────────────────── */
 .countdown {
-  display: grid; grid-template-columns: repeat(4, minmax(60px, 1fr));
-  gap: 0.48rem;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(0.35rem, 1.5vw, 0.48rem);
   margin: 1.15rem 0;
+  width: 100%;
+  max-width: 420px;
+  margin-inline: auto;
 }
 .countdown-card {
   border: 1px solid var(--line-dim);
-  background: var(--surface); padding: 0.7rem 0.5rem;
+  background: var(--surface);
+  padding: clamp(0.55rem, 1.5vw, 0.7rem) clamp(0.35rem, 1.2vw, 0.5rem);
   position: relative;
 }
 .countdown-card::before {
@@ -326,7 +353,7 @@ body.portal-in .portal-ring-c { animation-delay: 110ms; }
 }
 .countdown-card b {
   display: block; font-family: 'Cormorant Garamond', serif;
-  font-size: 1.65rem;
+  font-size: clamp(1.35rem, 4.5vw, 1.65rem);
   color: var(--gold);
   line-height: 1;
 }
@@ -448,9 +475,15 @@ body.portal-in .portal-ring-c { animation-delay: 110ms; }
 }
 
 /* ── STORY SECTION ───────────────────────────────────────────── */
-.story, .share { padding: 5rem 0; }
+.story, .share {
+  padding: clamp(3.25rem, 9vw, 5.5rem) 0;
+}
 .section-shell {
-  width: min(980px, 92vw); margin-inline: auto;
+  width: min(980px, 92vw);
+  margin-inline: auto;
+  padding-inline-start: max(0px, env(safe-area-inset-left, 0px));
+  padding-inline-end: max(0px, env(safe-area-inset-right, 0px));
+  box-sizing: border-box;
 }
 .section-tag {
   color: var(--gold); text-transform: uppercase;
@@ -478,11 +511,11 @@ body.portal-in .portal-ring-c { animation-delay: 110ms; }
 /* ── SHARE ROW ───────────────────────────────────────────────── */
 .share-panel {
   border: 1px solid var(--line-dim); background: var(--surface);
-  padding: 1.35rem 1.4rem;
+  padding: clamp(1.1rem, 3.5vw, 1.35rem) clamp(1rem, 3.5vw, 1.5rem);
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 1.5rem 2rem;
-  align-items: center;
+  gap: clamp(1.25rem, 3vw, 1.5rem) clamp(1.25rem, 4vw, 2rem);
+  align-items: start;
   position: relative;
 }
 .share-panel::before {
@@ -515,8 +548,10 @@ body.portal-in .portal-ring-c { animation-delay: 110ms; }
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
   gap: 0.75rem;
   text-align: center;
+  padding-top: 0.15rem;
 }
 .share-qr-caption {
   margin: 0;
@@ -547,14 +582,33 @@ body.portal-in .portal-ring-c { animation-delay: 110ms; }
   margin: 0;
   line-height: 1.45;
 }
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   .share-panel {
     grid-template-columns: 1fr;
     justify-items: stretch;
+    align-items: stretch;
+    gap: 1.5rem;
   }
   .share-panel-qr {
     justify-self: center;
-    padding-top: 0.25rem;
+    width: 100%;
+    max-width: 320px;
+    padding-top: 0.35rem;
+    border-top: 1px solid var(--line-dim);
+    padding-inline: 0.25rem;
+  }
+  .share-actions {
+    justify-content: center;
+  }
+  .share-panel-copy {
+    text-align: center;
+  }
+  .share-panel-copy h3,
+  .share-panel-lead {
+    margin-inline: auto;
+  }
+  .share-panel-lead {
+    max-width: 40rem;
   }
 }
 .wa-btn { display: inline-flex; align-items: center; gap: 0.45rem; }
@@ -564,9 +618,12 @@ body.portal-in .portal-ring-c { animation-delay: 110ms; }
 .footer {
   position: relative; z-index: 2;
   border-top: 1px solid var(--line-dim);
-  margin-top: 3rem; padding: 1.2rem clamp(1rem, 4vw, 2rem);
+  margin-top: clamp(2rem, 6vw, 3rem);
+  padding: 1.2rem clamp(1rem, 4vw, 2rem);
+  padding-bottom: max(1.2rem, env(safe-area-inset-bottom, 0px));
   display: flex; justify-content: space-between;
-  gap: 0.8rem; flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem 1.25rem; flex-wrap: wrap;
   color: var(--muted); font-size: 0.72rem;
 }
 .footer .footer-brand {
@@ -578,7 +635,9 @@ body.portal-in .portal-ring-c { animation-delay: 110ms; }
 .page-shell {
   position: relative; z-index: 2;
   width: min(900px, 92vw);
-  margin: 1.7rem auto 4.4rem;
+  margin: clamp(1.25rem, 4vw, 1.85rem) auto clamp(3rem, 8vw, 4.5rem);
+  padding-inline: max(0px, env(safe-area-inset-left, 0px)) max(0px, env(safe-area-inset-right, 0px));
+  box-sizing: border-box;
 }
 .page-title {
   font-family: 'Cormorant Garamond', serif;
@@ -729,7 +788,10 @@ body.portal-in .portal-ring-c { animation-delay: 110ms; }
 /* ── STEPPER ─────────────────────────────────────────────────── */
 .stepper { display: flex; align-items: center; gap: 1rem; }
 .stepper-btn {
-  width: 36px; height: 36px;
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
   border: 1px solid var(--line-dim); background: transparent;
   color: var(--gold); font-size: 1.2rem;
   cursor: none; display: grid; place-items: center;
@@ -936,6 +998,9 @@ tr:hover td { background: rgba(201,168,76,0.015); }
   display: none; position: fixed; inset: 0; z-index: 50;
   background: rgba(6,6,10,0.95);
   align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+  padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right))
+           max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  box-sizing: border-box;
 }
 .pdf-overlay.show { display: flex; }
 .pdf-spinner {
@@ -972,30 +1037,60 @@ tr:hover td { background: rgba(201,168,76,0.015); }
   .timeline-row::before { display: none; }
   .tl-stop { padding-top: 0; }
   .tl-stop::before { display: none; }
+  .detail-card {
+    padding: clamp(1.15rem, 3.5vw, 1.6rem);
+  }
 }
 @media (max-width: 560px) {
   .kpis { grid-template-columns: 1fr; }
   .photo-grid, .meal-grid { grid-template-columns: 1fr; }
-  .top-nav nav { gap: 0.8rem; }
-  .top-nav nav a { font-size: 0.58rem; }
+  .top-nav {
+    flex-wrap: wrap;
+    row-gap: 0.45rem;
+  }
+  .brand {
+    font-size: clamp(1.15rem, 4.5vw, 1.45rem);
+  }
+  .top-nav nav {
+    gap: 0.65rem;
+    flex-basis: auto;
+  }
+  .top-nav nav a { font-size: 0.56rem; letter-spacing: 0.12em; }
   .tap-enter {
     min-width: 0;
     width: 100%;
     max-width: 260px;
   }
   .hero-feature-frame {
-    width: min(320px, 92%);
+    width: min(320px, calc(92vw - env(safe-area-inset-left) - env(safe-area-inset-right)));
     margin-top: 0.95rem;
   }
   .hero-inner-bg {
     padding: 1.45rem 1rem 1.55rem;
   }
   .countdown {
-    margin: 0.95rem 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    max-width: 280px;
+    margin: 0.95rem auto;
   }
   .story p {
     font-size: 0.86rem;
     line-height: 1.8;
+  }
+  .timeline-row {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .footer {
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    gap: 0.65rem;
+  }
+  .footer > span {
+    width: 100%;
+    line-height: 1.45;
   }
 }
 @media (orientation: landscape) and (max-height: 560px) {

@@ -27,10 +27,10 @@ python3 -m http.server 8765
 ```
 
 Open:
-- `http://localhost:8765/index.html`
-- `http://localhost:8765/rsvp.html`
-- `http://localhost:8765/details.html`
-- `http://localhost:8765/dashboard.html`
+- `http://localhost:8765/` (home)
+- `http://localhost:8765/rsvp`
+- `http://localhost:8765/details`
+- `http://localhost:8765/dashboard`
 
 ## Supabase setup (required)
 
@@ -43,13 +43,13 @@ Open:
    - `supabaseAnonKey` (publishable/anon only)
    - `rsvpDeadlineIso`
    - `siteBaseUrl` (or keep `window.location.origin`)
-4. RSVP mode (current): **open registration** — guests use `rsvp.html` without invitation codes. Rows are stored with `invite_code` set to `WEB` and `invite_id` null.
+4. RSVP mode (current): **open registration** — guests use `/rsvp` without invitation codes. Rows are stored with `invite_code` set to `WEB` and `invite_id` null.
 
 Optional later: per-guest codes via `guest_invites` and URL query `?guest=CODE`.
 
 RSVP URL (production):
 
-`https://the-mugerwas-wedding.online/rsvp.html`
+`https://the-mugerwas-wedding.online/rsvp`
 
 ## Current deployment notes (DigitalOcean)
 
@@ -64,6 +64,8 @@ Basic deploy flow:
 scp -r /Users/Apple/Desktop/ode-workspace/themugerwas/* root@YOUR_IP:/var/www/themugerwas/
 ssh root@YOUR_IP "nginx -t && systemctl reload nginx"
 ```
+
+URLs are **extensionless** on production (`/rsvp`, `/details`, …). Nginx maps them to the matching `.html` files and redirects old `*.html` links to the clean path.
 
 ## Domain and HTTPS
 

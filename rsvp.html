@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Great+Vibes&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="/styles.css" />
 
   <style>
     /* ── RSVP SPLIT LAYOUT ──────────────────────────────── */
@@ -155,7 +155,33 @@
     @media (max-width: 860px) {
       .rsvp-shell { grid-template-columns: 1fr; }
       .rsvp-photo { display: none; }
-      .rsvp-form-panel { min-height: auto; padding: 1.5rem 1rem; }
+      .rsvp-form-panel {
+        min-height: auto;
+        padding: clamp(1.35rem, 4vw, 2rem) clamp(1rem, 4vw, 1.75rem);
+        padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px));
+        border-left: none;
+        border-top: 1px solid var(--line-dim);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .step-heading {
+        font-size: clamp(1.55rem, 7vw, 2rem);
+        margin-bottom: 1.35rem;
+      }
+      .rsvp-submit-wrap,
+      .tools-row.rsvp-nav-row {
+        justify-content: stretch;
+      }
+      .rsvp-submit-wrap .btn,
+      .tools-row.rsvp-nav-row .btn {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+      .mandala-wrap {
+        width: min(200px, 70vw);
+        height: min(200px, 70vw);
+      }
     }
 
     /* ── PDF invitation (off-screen, captured for download) — formal 5×7 keepsake ── */
@@ -333,7 +359,7 @@
             <p class="pdf-invitation-monogram" aria-hidden="true">T&nbsp;&amp;&nbsp;R</p>
             <div class="pdf-invitation-photo-mat">
               <div class="pdf-invitation-photo-aperture" id="pdf-photo-aperture">
-                <img id="pdf-card-photo" src="./public/themugerwas2.jpeg" alt="" crossorigin="anonymous" />
+                <img id="pdf-card-photo" src="/public/themugerwas2.jpeg" alt="" crossorigin="anonymous" />
               </div>
             </div>
             <div class="pdf-invitation-ornament-row" aria-hidden="true">
@@ -372,11 +398,11 @@
 
   <!-- NAV -->
   <header class="top-nav" role="banner">
-    <a class="brand" href="./index.html">The Mugerwas</a>
+    <a class="brand" href="/">The Mugerwas</a>
     <nav aria-label="Site navigation">
-      <a href="./index.html">Home</a>
-      <a href="./rsvp.html" aria-current="page">RSVP</a>
-      <a href="./details.html">Details</a>
+      <a href="/">Home</a>
+      <a href="/rsvp" aria-current="page">RSVP</a>
+      <a href="/details">Details</a>
     </nav>
   </header>
 
@@ -385,7 +411,7 @@
 
       <!-- LEFT — PHOTO PANEL -->
       <div class="rsvp-photo" aria-hidden="true">
-        <img src="./public/themugerwas3.jpeg" alt="" />
+        <img src="/public/themugerwas3.jpeg" alt="" />
         <div class="rsvp-photo-overlay"></div>
         <div class="rsvp-photo-text">
           <blockquote>
@@ -562,8 +588,8 @@
           <div class="confirm-chip">29 August 2026 &nbsp;·&nbsp; Kampala</div>
           <div style="margin-top:1.4rem;display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;">
             <button type="button" class="btn hidden" id="downloadInvitationBtn">Download invitation (PDF)</button>
-            <a class="btn btn-primary" href="./details.html">View Event Details →</a>
-            <a class="btn" href="./index.html">Back to Home</a>
+            <a class="btn btn-primary" href="/details">View Event Details →</a>
+            <a class="btn" href="/">Back to Home</a>
           </div>
         </div>
 
@@ -574,8 +600,8 @@
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./config.js"></script>
-  <script src="./main.js"></script>
-  <script src="./rsvp.js"></script>
+  <script src="/config.js"></script>
+  <script src="/main.js"></script>
+  <script src="/rsvp.js"></script>
 </body>
 </html>

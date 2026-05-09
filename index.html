@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Great+Vibes&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="/styles.css" />
 </head>
 <body data-page="home">
 
@@ -51,11 +51,11 @@
 
   <!-- NAVIGATION -->
   <header class="top-nav" role="banner">
-    <a class="brand" href="./index.html" aria-label="The Mugerwas — Home">The Mugerwas</a>
+    <a class="brand" href="/" aria-label="The Mugerwas — Home">The Mugerwas</a>
     <nav aria-label="Site navigation">
-      <a href="./index.html" aria-current="page">Home</a>
-      <a href="./rsvp.html">RSVP</a>
-      <a href="./details.html">Details</a>
+      <a href="/" aria-current="page">Home</a>
+      <a href="/rsvp">RSVP</a>
+      <a href="/details">Details</a>
     </nav>
   </header>
 
@@ -92,7 +92,7 @@
           <div class="countdown" id="countdown" aria-live="polite" aria-label="Time until the wedding"></div>
 
           <div class="cta-row">
-            <a class="btn btn-primary tap-enter" href="./rsvp.html" aria-label="Submit your RSVP">
+            <a class="btn btn-primary tap-enter" href="/rsvp" aria-label="Submit your RSVP">
               <div class="tap-ring" aria-hidden="true">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/>
@@ -101,14 +101,14 @@
               <span class="tap-label">RSVP Now</span>
             </a>
           </div>
-          <a class="details-link-hero" href="./details.html" aria-label="View event details">View Details</a>
+          <a class="details-link-hero" href="/details" aria-label="View event details">View Details</a>
 
           <p style="margin-top:1rem;font-size:0.7rem;letter-spacing:0.1em;color:var(--muted);">
             Dress Code: Black Tie &nbsp;·&nbsp; RSVP closes 1 August 2026
           </p>
 
           <figure class="hero-feature-frame" aria-label="Featured wedding portrait">
-            <img src="./public/themugerwas2.jpeg"
+            <img src="/public/themugerwas2.jpeg"
                  alt="Tim and Rebecca in an elegant portrait"
                  loading="eager"
                  width="720"
@@ -130,8 +130,8 @@
           night crafted with warmth, beauty, and the people we love most.
         </p>
         <div style="margin-top:1.4rem;display:flex;gap:0.8rem;flex-wrap:wrap;">
-          <a class="btn btn-primary" href="./rsvp.html">Confirm Attendance</a>
-          <a class="btn" href="./details.html">Event Details</a>
+          <a class="btn btn-primary" href="/rsvp">Confirm Attendance</a>
+          <a class="btn" href="/details">Event Details</a>
         </div>
       </div>
     </section>
@@ -158,7 +158,7 @@
           </div>
           <div class="share-panel-qr">
             <p class="share-qr-caption">Scan or download</p>
-            <div id="share-qr-host" class="share-qr-host" aria-label="QR code that opens the RSVP page"></div>
+            <div id="share-qr-host" class="share-qr-host" aria-label="QR code that opens the invitation home page"></div>
             <button id="share-qr-download" class="btn share-qr-download" type="button"
                     aria-label="Download QR code as PNG">
               Download QR (PNG)
@@ -177,8 +177,8 @@
   </footer>
 
   <!-- CONFIG must come before scripts -->
-  <script src="./config.js"></script>
+  <script src="/config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
-  <script src="./main.js"></script>
+  <script src="/main.js"></script>
 </body>
 </html>
