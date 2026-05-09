@@ -6,7 +6,7 @@ window.WEDDING_CONFIG = {
   siteBaseUrl: "https://your-domain.com",
   confirmationEmailEndpoint: "/functions/v1/send-rsvp-confirmation",
   invitationPdf: {
-    cardImageUrl: "./public/themugerwas3.jpeg",
+    cardImageUrl: "./public/themugerwas2.jpeg",
     honorLine: "The honour of your presence is requested",
     coupleNames: "Your Names",
     dateFormalLine: "Saturday, the first of August",

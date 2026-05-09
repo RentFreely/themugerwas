@@ -92,7 +92,7 @@
   const wantsSeatsAndMeal = (v) => v === "yes" || v === "maybe";
 
   const defaultInvitationPdf = () => ({
-    cardImageUrl: "./public/themugerwas3.jpeg",
+    cardImageUrl: "./public/themugerwas2.jpeg",
     honorLine: "The honour of your presence is requested",
     coupleNames: "Tim & Rebecca",
     dateFormalLine: "Saturday, the twenty-ninth of August",
@@ -100,6 +100,52 @@
     venueLine: "Speke Resort Munyonyo · Kampala",
     attireLine: "Black Tie · Evening reception",
   });
+
+  /**
+   * html2canvas mis-handles object-fit on img tags. Rasterize with a contain fit so the full
+   * photograph appears inside the frame (dark mat fills letterboxing when aspect ratios differ).
+   */
+  const rasterizeInvitationPhotoForPdf = (photoEl, apertureEl) => {
+    const iw = photoEl.naturalWidth;
+    const ih = photoEl.naturalHeight;
+    if (!iw || !ih || !apertureEl) return;
+
+    let w = Math.round(apertureEl.getBoundingClientRect().width);
+    let h = Math.round(apertureEl.getBoundingClientRect().height);
+    if (w < 12 || h < 12) {
+      w = Math.round(apertureEl.clientWidth) || 476;
+      h = Math.round(apertureEl.clientHeight) || 318;
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+
+    ctx.fillStyle = "#060504";
+    ctx.fillRect(0, 0, w, h);
+
+    const scale = Math.min(w / iw, h / ih);
+    const dw = Math.round(iw * scale);
+    const dh = Math.round(ih * scale);
+    const dx = Math.round((w - dw) / 2);
+    const dy = Math.round((h - dh) / 2);
+    ctx.drawImage(photoEl, 0, 0, iw, ih, dx, dy, dw, dh);
+
+    photoEl.src = canvas.toDataURL("image/jpeg", 0.94);
+    photoEl.style.objectFit = "fill";
+    photoEl.style.objectPosition = "center center";
+  };
+
+  const resetInvitationPhotoElement = (photoEl, sourceUrl) => {
+    if (!photoEl) return;
+    photoEl.style.objectFit = "";
+    photoEl.style.objectPosition = "";
+    photoEl.src = sourceUrl;
+  };
 
   /**
    * Fills the off-screen invitation card and renders a 5×7 in PDF (luxury print style).
@@ -217,11 +263,29 @@
     await document.fonts.ready;
     await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
 
-    const canvas = await html2canvas(card, {
+    const aperture = document.getElementById("pdf-photo-aperture");
+    try {
+      if (aperture && photo.naturalWidth > 0) {
+        rasterizeInvitationPhotoForPdf(photo, aperture);
+        await new Promise((resolve) => {
+          if (photo.complete && photo.naturalWidth > 0) queueMicrotask(resolve);
+          else photo.addEventListener("load", resolve, { once: true });
+        });
+        if (photo.decode) {
+          try {
+            await photo.decode();
+          } catch {
+            /* ignore */
+          }
+        }
+      }
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+      const canvas = await html2canvas(card, {
       scale: 2,
       useCORS: true,
       allowTaint: false,
-      backgroundColor: "#050506",
+      backgroundColor: "#141210",
       logging: false,
     });
 
@@ -234,6 +298,9 @@
     pdf.addImage(imgData, "JPEG", 0, 0, pageW, pageH, undefined, "FAST");
     pdf.save("The-Mugerwas-Invitation.pdf");
     return true;
+    } finally {
+      resetInvitationPhotoElement(photo, resolvedImg);
+    }
   };
 
   attendChoices.forEach((choice) => {

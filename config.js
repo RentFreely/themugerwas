@@ -6,7 +6,7 @@ window.WEDDING_CONFIG = {
   siteBaseUrl: window.location.origin,
   confirmationEmailEndpoint: "",
   invitationPdf: {
-    cardImageUrl: "./public/themugerwas3.jpeg",
+    cardImageUrl: "./public/themugerwas2.jpeg",
     honorLine: "The honour of your presence is requested",
     coupleNames: "Tim & Rebecca",
     dateFormalLine: "Saturday, the twenty-ninth of August",
